@@ -77,30 +77,28 @@
 示例代码
 
 ```
- // 抽象工厂方法
  var VehicleFactory = function(subType, superType){
-   // 判断抽象工厂中是否有该抽象类, 抽象类的类型在js中肯定是function 函数
-   if(typeof VehicleFactory[superType] === 'function') {
+   if(typeof VehicleFactory[superType] === 'function'){
       // 缓存类
-      function F() {}
-        // 继承父类属性和方法
-        F.prototype = new VehicleFactory[superType]()
-        // 将子类的constructor指向子类
-        subType.constructor = subType
-        // 子类原型继承“父类”
-        subType.prototype = new F()
-   }else {
-      // 不存在该抽象类抛出错误
-      throw new Error('未创建该抽象类')
+      function F(){}
+      // 继承父类的属性和方法
+      F.prototype = new VehicleFactory[superType]()
+      // 将子类的constructor指向子类
+      subType.constuctor = subType
+      // 子类原型继承"父类"(父类的一个实例)
+      subType.prototype = new F()
+   } else {
+      // 抛出未创建抽象类的错误
+      throw new Error('为创建该抽象类')
    }
  }
-
+ 
  // 小汽车抽象类
- VehicleFactory.car = function(){
-    this.type = 'car'
+ VehicleFactory.Car = function(){
+   this.type = 'car' 
  }
  
- VehicleFactory.car.prototype = {
+ VehicleFactory.Car.prototype = {
    getPrice: function(){
      return new Error('抽象方法不能调用')
    },
@@ -109,33 +107,34 @@
    }
  }
  
- // 公交车抽象类
- VehicleFactory.Bus = function() {
-    this.type = 'bus'
+ // 公共汽车抽象类
+ VehicleFactory.Bus = function(){
+   this.type = 'bus'
  }
  
  VehicleFactory.Bus.prototype = {
    getPrice: function(){
-     return new Error('抽象方法不能调用')
-   	},
+     return new Error('抽象方法不能调用，只能重写')
+   },
    getPassengerNum: function(){
-     return new Error('抽象方法不能调用')
+     return new Error('抽象方法不能调用，只能重写')
    }
  }
  
- // 货车抽象类
- VehicleFactory.Truck = funcion() {
+ // 卡车抽象类
+ VehicleFactory.Truck = function(){
    this.type = 'truck'
- };
+ }
+ 
  VehicleFactory.Truck.prototype = {
    getPrice: function(){
-     return new Error('抽象方法不能调用')
-   	},
-   	getTrainload: function(){
-   	  return new Error('抽象方法不能调用')
-   	}
+     return new Error('抽象方法不能调用，只能重写')
+   },
+   getTrainload: function(){
+     return new Error('抽象方法不能调用，只能重写')
+   }
  }
-
+  
 ```
 
 从上面代码可以看出
@@ -143,7 +142,79 @@
 * 抽象工厂其实是一个实现子类继承父类的方法
 * 在这个方法中我们需要通过传递子类以及要继承父类(抽象类)的名称
 * 并且在抽象工厂方法中又增加了一次对抽象类存在性的一次判断，如果存在，则将子类继承父类的方法
-* 然后子类通过寄生式继承，不过不是继承父类的原型，而是通过new关键字复制父类的一个实例（这么做的原因是因为过渡类不应仅仅继承父类的原型方法，还要继承父类的对象属性，所以要通过new关键字将父类的构造函数执行一遍来复制构造函数中的属性和方法）
+* 然后子类通过寄生式继承，不过不是继承父类的原型，而是通过new关键字复制父类的一个实例（这么做的原因是因为过渡类不应仅仅继承父类的原型方法，还要继承父类的**对象属性**，所以要通过new关键字将父类的构造函数执行一遍来复制构造函数中的属性和方法）
 * 对抽象工厂添加抽象类也很特殊，因为抽象工厂是个方法不需要实例化对象，所以只需要一份，因此直接为抽象工厂添加类的属性即可
 
-to be continued 下班了 明天继续
+使用方法
+
+```
+ // 宝马汽车类
+ let BMW = function(price, speed){
+   this.price = price;
+   this.speed = speed;
+ }
+ 
+ // 使用抽象工厂方法继承抽象类‘Car’
+ VehicleFactory(BMW,'Car')
+ // 重写抽象类的方法
+ BMW.prototype.getPrice = function(){
+    return this.price
+ }
+ 
+ BMW.prototype.getSpeed = function(){
+    return this.speed
+ }
+ 
+ // 宇通汽车类
+ let YUTONG = function(price, passenger) {
+   this.price = price;
+   this.speed = passenger;
+ }
+ // 抽象工厂实现对Bus抽象类的继承
+ VehicleFactory(YUTONG, 'Bus')
+ // 重写抽象类的方法
+ YUTONG.prototype.getPrice = function(){
+   return this.price
+ }
+ 
+ YUTONG.prototype.getPassengerNum = function(){
+   return this.passenger
+ }
+ 
+ // 奔驰卡车类
+ let BenzTruck = function(price, trainload){
+   this.price = price;
+   this.trainload = trainload;
+ }
+ 
+ // 抽象工厂实现对Truck抽象类的继承
+ VehicleFactory(BenzTruck, 'Truck')
+ // 重写抽象类的方法
+ BenzTruck.prototype.getSpeed = function(){
+   return this.speed
+ }
+ 
+ BenzTruck.prototype.getTrainload = function(){
+   return this.trainload
+ }
+ 
+ // 实例化
+ let car = new BMW(200000, 100)
+ console.log(car.getPrice())    // 200000
+ console.log(car.type)          // car
+```
+
+自己这些代码的过程中
+
+* 抽象工厂方法的意义在于，实现子类对父类（抽象类）的继承，从而继承**抽象类**的属性和方法，对抽象类的方法进行重写，达到复用的目的
+* 可以对多个抽象类进行封装，能够方便管理
+* 和Java的抽象类达到比较相似的程度
+
+由于更熟悉这个抽象工厂模式，从而自己写了几次，所以更新的比较慢，见谅，主要是想要彻底熟悉了解这个抽象工厂方法
+
+收获：
+
+* 抽象工厂模式是设计模式中最抽象的一种，也是创建模式中唯一一种抽象化创建模式。
+* 该模式创建出的结果不是一个真实的对象实例，而是一个类簇(管理多个抽象类)，它制定了类的结构
+* 区别于 简单工厂模式 创建单一对象， 工厂方式模式创建多累对象
+* 由于JavaScript中不支持抽象化创建与虚拟方法，所以导致这种模式不能像其他面向对象语言中应用得那么广泛

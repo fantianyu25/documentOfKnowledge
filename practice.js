@@ -4,25 +4,60 @@
  *
  * 写文件功能
  */
-function add() {
-	// 第一次执行时获取所有参数
-	let _args = Array.prototype.slice.apply(arguments) || Array.from(arguments);
+var VehicleFactory = function(subType, superType){
+	if(typeof VehicleFactory[superType] === 'function'){
+		// 缓存类
+		function F(){}
+		// 继承父类的属性和方法
+		F.prototype = new VehicleFactory[superType]()
+		// 将子类的constructor指向子类
+		subType.constuctor = subType
+		// 子类原型继承"父类"(父类的一个实例)
+		subType.prototype = new F()
+	} else {
+		// 抛出未创建抽象类的错误
+		throw new Error('为创建该抽象类')
+	}
+}
 
-	// 根据闭包的特性，数据可以在闭包里存储在js内存中, 收集后面所有参数
-	let _add = function() {
-		_args.push(...arguments);
+// 小汽车抽象类
+VehicleFactory.Car = function(){
+	this.type = 'car'
+}
 
-		return _add;
-	};
+VehicleFactory.Car.prototype = {
+	getPrice: function(){
+		return new Error('抽象方法不能调用')
+	},
+	getSpeed: function(){
+		return new Error('抽象方法不能调用')
+	}
+}
 
-	// 最后通过toString或者valueOf的隐式转换获取最终结果
-	_add.toString = function() {
-		return _args.reduce((p, n) => p + n);
-	};
+// 公共汽车抽象类
+VehicleFactory.Bus = function(){
+	this.type = 'bus'
+}
 
-	_add.valueOf = function() {
-		return _args.reduce((p, n) => p + n);
-	};
+VehicleFactory.Bus.prototype = {
+	getPrice: function(){
+		return new Error('抽象方法不能调用，只能重写')
+	},
+	getPassengerNum: function(){
+		return new Error('抽象方法不能调用，只能重写')
+	}
+}
 
-	return _add
+// 卡车抽象类
+VehicleFactory.Truck = function(){
+	this.type = 'truck'
+}
+
+VehicleFactory.Truck.prototype = {
+	getPrice: function(){
+		return new Error('抽象方法不能调用，只能重写')
+	},
+	getTrainload: function(){
+		return new Error('抽象方法不能调用，只能重写')
+	}
 }
