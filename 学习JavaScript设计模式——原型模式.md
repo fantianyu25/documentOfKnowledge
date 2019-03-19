@@ -91,7 +91,7 @@
   
   SlideLoopImg.prototype = new LoopImages();
   // 重写继承的切换下一张图片方法
-  SlideLoopImg.prototype = function(){
+  SlideLoopImg.prototype.changeImage = function(){
      console.log('SlideLoopImg changeImage function');
   }
   // 渐隐切换类
