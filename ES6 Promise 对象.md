@@ -5,11 +5,11 @@
 3. 从语法上说，Promise是一个对象，从它可以获取异步操作的消息。
 
 ### Pomise的特点
-* 对象的状态不受外界影响。
+* **对象的状态不受外界影响**
   * Promise 对象代表一个异步操作，有三种状态：pending(进行中)、fulfilled(已成功)、rejected(已失败)
   * 只有异步操作的结果，可以决定当前是哪一种状态，任何其他操作都无法改变这个状态。
 
-* 一旦状态改变，就不会再变，任何时候都可以得到这个结果。
+* **一旦状态改变，就不会再变，任何时候都可以得到这个结果**
   * Promise对象的状态改变，只有两种可能，从pending变为fulfilled 和 从pending 变为rejected.
   * 只要这两种情况发生，状态就凝固了，不会再变了，会一直保持这个结果，这是就称为resolved(已定型)。
   * 如果改变已经发生了，你再对Promise对象添加回调函数，也会立即得到这个结果。这与事件(Event)完全不同，事件的特点是，如果你错过它，再去监听，是得不到结果的。
@@ -47,4 +47,118 @@
 
 
 * Promise实例生成以后，可以用then方法分别指定resolved和rejected状态的回调函数
-*   
+
+```
+ promise.then(function(value){
+   // 请求完成 处理 success
+ }, function(error){
+   // failure 错误处理
+ })
+```  
+
+* then方法可以接受两个回调函数作为参数。
+* 第一个回调函数是Promise的 resolved时调用，
+* 第二个是Promise的 rejected时调用. 
+* 第二个参数是可以选的，不一定要提供
+* 这两个函数都接受Promise对象传出的值作为参数
+
+```
+  // Promse对象的简单例子
+  function timeout(ms){
+     return new Promise(function(resolve, reject){
+        setTimeout(resolve, ms, 'done')
+     })
+  }
+  
+  timeout(100).then(value=>{
+     console.log(value)
+  })
+
+```
+* timeout 方法返回一个Promise实例，表示一段时间以后才会发生的结果
+* 过了指定时间(ms参数)以后
+* Promise实例的状态变为resolved就会触发then方法绑定的回调函数
+
+```
+  // Promise 新建后会立即执行
+  let promise = new Promise((resolve, reject)=>{
+     console.log('Promise');
+     resolve();
+  })
+  
+  promise.then(function(){
+     console.log('resolved');
+  })
+  
+  console.log('Hi!')
+  
+  // Promise
+  // Hi!
+  // resolved
+  
+```
+
+* Promise实例新建后会立即执行，所以首先输出Promise
+* then方法指定的回调函数，将在当前脚本所有同步任务执行完之后才会执行，所以会resolved最后输出
+
+```
+  // 异步加载图片的例子
+  function loadImageAsync(url){
+    return new Promise((resolve,reject)=>{
+       const image = new Image();
+       
+       image.onload = function(){
+         resolve(image)
+       }
+       
+       image.onerror = function(){
+         reject(new Error('Could not load image at '+ url))
+       }
+    }) 
+  }
+ 
+```
+
+```
+  // ajax操作
+  const getJSON = function(url){
+     const promise = new Promise((resolve, reject)=>{
+        const handler = function() {
+           if(this.readyState !== 4) {
+              return;
+           }
+           if(this.status === 200) {
+             resolve(this.response);
+           } else {
+             reject(new Error(this.statusText))
+           }
+        };
+        
+        const client = new XMLHttpRequest();
+        client.open("GET", url)l
+        client.onreadystatechange = handler
+        client.responseType = "json";
+        client.setRequestHeader('Accept', "application/json");
+        client.send();
+     });
+     return promise;
+  }
+  
+  getJSON("/posts.json").then(function(json){
+    console.log('Contents' + json)
+  }, function(error){
+    console.error('出错了', error)
+  })
+  
+```
+
+上面代码中
+
+* getJSON 是对XMLHttpRequest对象的封装，用于发出一个针对JSON数据的HTTP请求
+* 并返回一个Promise对象
+* 在getJSON内部，resolve函数和reject函数调用时，都带有参数
+
+
+* 如果调用resolve函数和reject函数时带有参数，那么它们的参数会被传递给回调函数。
+* reject函数的参数通常是Error对象的实例，表示抛出错误
+* resolve函数的参数除了正常的值以外，还可能是另一个Promise实例
