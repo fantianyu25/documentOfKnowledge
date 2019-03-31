@@ -34,3 +34,5 @@
 #### 这里是我平时学习提升，总结知识点的文档，希望能对同样是前端的童鞋起到一定作用
 
 #### 我会持续更新，目前是看JavaScript设计模式，顺便会更新一些平常没有注意到的面试知识点
+
+<a href="https://996.icu"><img src="https://img.shields.io/badge/link-996.icu-red.svg"></a>
